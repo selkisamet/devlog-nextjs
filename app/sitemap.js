@@ -1,12 +1,19 @@
-import data from "@/data.json";
+import { prisma } from "@/lib/prisma";
 
-export default function sitemap() {
-    const baseUrl = "https://devlog-samet.vercel.app"; // Kendi URL'in olacak
+export default async function sitemap() {
+    const baseUrl = "https://devlog-samet.vercel.app";
 
-    // Blog yazılarını haritaya ekle
-    const blogPosts = data.posts.map((post) => ({
+    // Veritabanından tüm yazıların slug'larını çekiyoruz
+    const posts = await prisma.post.findMany({
+        select: {
+            slug: true,
+            updatedAt: true,
+        },
+    });
+
+    const blogPosts = posts.map((post) => ({
         url: `${baseUrl}/blog/${post.slug}`,
-        lastModified: new Date(),
+        lastModified: post.updatedAt,
     }));
 
     return [
